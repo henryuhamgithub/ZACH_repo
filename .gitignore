@@ -1,0 +1,28 @@
+# Node modules
+node_modules/
+
+# Build artifacts
+dist/
+build/
+.parcel-cache/ # If using Parcel
+.vite/ # If using Vite
+
+# Editor and IDE configurations
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
