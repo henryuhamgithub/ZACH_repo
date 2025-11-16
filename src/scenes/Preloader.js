@@ -34,6 +34,16 @@ export class Preloader extends Phaser.Scene {
             'dude.png',
             {frameWidth: 32, frameHeight: 48}
         );
+        this.load.image('dudeCrouch', 'dudeCrouch.png');
+        this.load.image('dudeCP', 'dudeCrouchPrincess.png');
+        this.load.image('princess', 'Princess.png');
+        this.load.spritesheet(
+            'dudePrincess',
+            'dudePrincess.png',
+            {frameWidth: 32, frameHeight: 48}
+        );
+        this.load.image('princessAirLeft', 'princessAirLeft.png');
+        this.load.image('princessAirRight', 'princessAirRight.png');
     }
 
     create() {
