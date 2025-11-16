@@ -1,15 +1,27 @@
-export class Player extends Phaser.Physics.Arcade.Sprite
+export class Player extends Phaser.Physics.Matter.Sprite
 {
     constructor(scene, x, y)
     {
-        super(scene, x, y, 'dude');
+        super(scene.matter.world, x, y, 'dude');
 
         scene.add.existing(this);
-        scene.physics.add.existing(this);
 
-        this.setBounce(0.2);
-        this.setCollideWorldBounds(true);
+        this.setFixedRotation();
+
+        this.setFrictionAir(0);
+        this.setFriction(0);
+        this.setBounce(0);
+
+        this.isGrounded = false;
+
         this.initAnimations();
+        this.jumpCooldown = 0;
+        this.facing = 'right';
+        this.jumping = false;
+        this.jumpCharging = false;
+        this.charge = 0;
+        this.bounced = false;
+        this.carrying = false;
     }
 
     initAnimations ()
@@ -34,34 +46,79 @@ export class Player extends Phaser.Physics.Arcade.Sprite
             frameRate: 10,
             repeat: -1,
         })
+
+        this.anims.create({
+            key: 'leftPrincess',
+            frames: this.anims.generateFrameNumbers('dudePrincess', { start: 0, end: 3}),
+            frameRate: 10,
+            repeat: -1
+        })
+
+        this.anims.create({
+            key: 'turnPrincess',
+            frames: this.anims.generateFrameNumbers('dudePrincess', { start: 4, end: 4 }),
+            frameRate:10,
+            repeat: -1,
+        })
+
+        this.anims.create({
+            key: 'rightPrincess',
+            frames: this.anims.generateFrameNumbers('dudePrincess', { start: 5, end: 8}),
+            frameRate: 10,
+            repeat: -1,
+        })
     }
 
     moveLeft ()
     {
-        this.setVelocityX(-200);
+        this.setVelocityX(-4);
 
-        this.anims.play('left', true);
+        if (this.carrying){
+            this.anims.play('leftPrincess', true);
+        } else {
+            this.anims.play('left', true);
+        }
+        this.facing = 'left';
     }
 
     moveRight ()
     {
-        this.setVelocityX(200);
+        this.setVelocityX(4);
 
-        this.anims.play('right', true);
+        if (this.carrying) {
+            this.anims.play('rightPrincess', true);
+        } else {
+            this.anims.play('right', true);
+        }
+        this.facing = 'right';
     }
 
     idle ()
     {
-        this.setVelocityX(0);
-
-        this.anims.play('turn');
-    }
-
-    jump ()
-    {
-        if (this.body.blocked.down)
+        if (!this.jumping)
         {
-            this.setVelocityY(-500)
+        this.setVelocityX(0);
+        }
+        if (this.carrying) {
+            this.anims.play('turnPrincess');
+        } else {
+            this.anims.play('turn');
         }
     }
+    jump ()
+    {
+        if (Math.abs(this.body.velocity.y) < 0.5) {
+            this.setVelocityY(this.charge);
+            this.jumpCooldown = 40;
+            this.jumping = true;
+            if (this.facing == 'right')
+            {
+                this.setVelocityX(4);
+            }
+            else if (this.facing == 'left')
+            {
+                this.setVelocityX(-4);
+            }
+        }
+    }    
 }
