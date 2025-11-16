@@ -9,8 +9,6 @@ export class Game extends Phaser.Scene {
     {
         this.add.image(400,1700, 'sky');
 
-        this.platforms = [];
-
         // Create ground with visible sprite
         let groundSprite = this.add.tileSprite(400, 1968, 1600, 64, 'ground');
         this.matter.add.gameObject(groundSprite, { isStatic: true, label: 'platform' });
@@ -25,29 +23,93 @@ export class Game extends Phaser.Scene {
         let platform3 = this.add.image(750, 1620, 'ground');
         this.matter.add.gameObject(platform3, { isStatic: true, label: 'platform' });
 
-        this.player = new Player(this, 100, 1850);
+        const shapes = this.cache.json.get('slopeShapes');
+        let slopeSprite = this.add.image(250, 1400, 'slope');
+        this.matter.add.gameObject(slopeSprite, {
+            shape: shapes.slope,
+            isStatic: true,
+            label: 'platform'
+        });
 
-        //player collisions with ground
+        this.player = new Player(this, 100, 1850);
+        this.princess = new Princess(this, 150, 1850);
+
+        
         this.matter.world.on('collisionstart', (event) => {
             event.pairs.forEach((pair) => {
-                const otherBody = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
-                if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody.label === 'platform') {
+
+                //player collision with ground
+                const otherBody1 = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
+                if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody1.label === 'platform') {
                     this.player.isGrounded = true;
                 }
-            });
-        });
-        this.matter.world.on('collisionend', (event) => {
-            event.pairs.forEach((pair) => {
-                const otherBody = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
-                if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody.label === 'platform') {
-                    this.player.isGrounded = false;
+
+                //princess and player collision
+                const otherBody2 = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
+                if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody2 === this.princess.body) {
+                    this.pickupPrincess(this.player, this.princess);
                 }
+
+                //princess wall bounce
+                if ((pair.bodyA === this.princess.body || pair.bodyB === this.princess.body)) {
+                    const normal = pair.collision.normal;
+                    const otherBody = pair.bodyA === this.princess.body ? pair.bodyB : pair.bodyA;
+                    // Check if it's a platform collision
+                    if (otherBody.label === 'platform' && !this.princess.isGrounded && this.princess.bounceCooldown == 0) {
+                        // Check if hitting from the side (normal.x is significant)
+                        if (Math.abs(normal.x) > 0.5) {
+                            const currentVelY = this.princess.body.velocity.y
+                            // Hitting right side of platform (bounce left)
+                            if (normal.x > 0) {
+                                this.princess.setVelocityX(-3);
+                                this.princess.setVelocityY(currentVelY + (currentVelY * 0.5));
+                            }
+                            // Hitting left side of platform (bounce right)
+                            else {
+                                this.princess.setVelocityX(3);
+                                this.princess.setVelocityY(currentVelY + (currentVelY * 0.5));
+                            }
+
+                            this.princess.bounceCooldown = 20;
+                        }
+                    }
+                }
+
+                //princess collision with ground
+                const otherBody3 = pair.bodyA === this.princess.body ? pair.bodyB : pair.bodyA;
+                if ((pair.bodyA === this.princess.body || pair.bodyB === this.princess.body) && otherBody3.label === 'platform') {
+                    const normal = pair.collision.normal;
+                    if (Math.abs(normal.y) > .7){
+                    this.princess.isGrounded = true;
+                    }
+                }
+
             });
         });
 
-        //player wall bounce
+        this.matter.world.on('collisionend', (event) => {
+            event.pairs.forEach((pair) => {
+
+                //player
+                const otherBody1 = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
+                if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody1.label === 'platform') {
+                    this.player.isGrounded = false;
+                }
+                
+                //princess
+                const otherBody2 = pair.bodyA === this.princess.body ? pair.bodyB : pair.bodyA;
+                if ((pair.bodyA === this.princess.body || pair.bodyB === this.princess.body) && otherBody2.label === 'platform') {
+                    this.princess.isGrounded = false;
+                }
+
+            });
+        });
+
+        
         this.matter.world.on('collisionactive', (event) => {
             event.pairs.forEach((pair) => {
+
+                //player wall bounce
                 if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body)) {
                     const normal = pair.collision.normal;
                     const otherBody = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
@@ -71,63 +133,7 @@ export class Game extends Phaser.Scene {
                         }
                     }
                 }
-            });
-        });
 
-        this.princess = new Princess(this, 150, 1850);
-        //princess and player collision
-        this.matter.world.on('collisionstart', (event) => {
-                event.pairs.forEach((pair) => {
-                    const otherBody = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
-                    if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody === this.princess.body) {
-                        this.pickupPrincess(this.player, this.princess);
-                    }
-            });
-        });
-
-        //princess collisions with ground
-        this.matter.world.on('collisionstart', (event) => {
-            event.pairs.forEach((pair) => {
-                const otherBody = pair.bodyA === this.princess.body ? pair.bodyB : pair.bodyA;
-                if ((pair.bodyA === this.princess.body || pair.bodyB === this.princess.body) && otherBody.label === 'platform') {
-                    this.princess.isGrounded = true;
-                }
-            });
-        });
-        this.matter.world.on('collisionend', (event) => {
-            event.pairs.forEach((pair) => {
-                const otherBody = pair.bodyA === this.princess.body ? pair.bodyB : pair.bodyA;
-                if ((pair.bodyA === this.princess.body || pair.bodyB === this.princess.body) && otherBody.label === 'platform') {
-                    this.princess.isGrounded = false;
-                }
-            });
-        });
-
-        //princess wall bounce
-        this.matter.world.on('collisionactive', (event) => {
-            event.pairs.forEach((pair) => {
-                if ((pair.bodyA === this.princess.body || pair.bodyB === this.princess.body)) {
-                    const normal = pair.collision.normal;
-                    const otherBody = pair.bodyA === this.princess.body ? pair.bodyB : pair.bodyA;
-            
-                    // Check if it's a platform collision
-                    if (otherBody.label === 'platform' && !this.princess.isGrounded) {
-                        // Check if hitting from the side (normal.x is significant)
-                        if (Math.abs(normal.x) > 0.5) {
-                            const currentVelY = this.princess.body.velocity.y
-                            // Hitting right side of platform (bounce left)
-                            if (normal.x > 0) {
-                                this.player.setVelocityX(-4);
-                                this.player.setVelocityY(currentVelY + (currentVelY * 0.5));
-                            }
-                            // Hitting left side of platform (bounce right)
-                            else {
-                                this.princess.setVelocityX(7);
-                                this.princess.setVelocityY(-7);
-                            }
-                        }
-                    }
-                }
             });
         });
 
@@ -152,9 +158,13 @@ export class Game extends Phaser.Scene {
             player.jumping = false;
         }
 
-        // Decrement jump cooldown
+        // Decrement jump cooldown and bounce cooldown for princess
         if (player.jumpCooldown > 0 && player.isGrounded){
-            player.jumpCooldown -= 1;
+            player.jumpCooldown -=1 ;
+        }
+
+        if (princess.bounceCooldown > 0){
+            princess.bounceCooldown -=1 ;
         }
 
         // Handle movement
@@ -240,15 +250,24 @@ export class Game extends Phaser.Scene {
         }
 
         //princess bounce
-        if (princess.isGrounded && princess.body.velocity.y <= 0){
-            if (princess.grounded){
+        if (princess.isGrounded && princess.body.velocity.y >= 0 && princess.bounceCooldown === 0){
+            if (Math.abs(princess.body.velocity.x) > 0.5 || Math.abs(princess.body.velocity.y) > 0) {
                 princess.setVelocityY(princess.bounce); 
                 princess.setVelocityX(princess.body.velocity.x * 0.5);
-                princess.bounce *= .5
+                princess.bounce *= 0.5;
+                princess.bounceCooldown = 20;  
             } else {
                 princess.setVelocityX(0);
             }
             princess.setTexture('princess');
+        }
+
+        //manual princess friction
+        if (princess.isGrounded && Math.abs(princess.body.velocity.x) > 0 && Math.abs(princess.body.velocity.y) < 1) {
+            princess.setVelocityX(princess.body.velocity.x * 0.95);
+            if (Math.abs(princess.body.velocity.x) < 0.5) {
+                princess.setVelocityX(0);
+            }
         }
     }
     
@@ -262,5 +281,6 @@ export class Game extends Phaser.Scene {
         this.princess.setSensor(true);
         this.princess.setPosition(-100, -100);
         this.player.carrying = true;
+        this.player.setTexture('dudePrincess');
     }
 }
