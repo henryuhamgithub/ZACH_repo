@@ -27,8 +27,11 @@ export class Preloader extends Phaser.Scene {
         this.load.setPath('assets');
         this.load.image('sky', 'sky.png');
         this.load.image('ground', 'platform.png');
-        this.load.image('star', 'star.png');
-        this.load.image('bomb', 'bomb.png');
+        this.load.image('ladder', 'ladder.png');
+
+        this.load.json('slopeShapes', 'slope.json');
+        this.load.image('slope', 'slope.png');
+
         this.load.spritesheet(
             'dude',
             'dude.png',
@@ -36,6 +39,7 @@ export class Preloader extends Phaser.Scene {
         );
         this.load.image('dudeCrouch', 'dudeCrouch.png');
         this.load.image('dudeCP', 'dudeCrouchPrincess.png');
+
         this.load.image('princess', 'Princess.png');
         this.load.spritesheet(
             'dudePrincess',
