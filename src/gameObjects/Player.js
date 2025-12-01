@@ -20,8 +20,10 @@ export class Player extends Phaser.Physics.Matter.Sprite
         this.jumping = false;
         this.jumpCharging = false;
         this.charge = 0;
-        this.bounced = false;
+        this.bounceCooldown = 0;
         this.carrying = false;
+        this.onLadder = false;
+        this.climbing = true;
     }
 
     initAnimations ()
@@ -71,8 +73,12 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
     moveLeft ()
     {
-        this.setVelocityX(-4);
-
+        if (this.climbing){
+            this.setVelocityX(-1);
+        } else{
+            this.setVelocityX(-4);
+        }
+        
         if (this.carrying){
             this.anims.play('leftPrincess', true);
         } else {
@@ -83,7 +89,11 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
     moveRight ()
     {
-        this.setVelocityX(4);
+        if (this.climbing){
+            this.setVelocityX(1);
+        } else{
+            this.setVelocityX(4);
+        }
 
         if (this.carrying) {
             this.anims.play('rightPrincess', true);
@@ -95,7 +105,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
     idle ()
     {
-        if (!this.jumping)
+       if (!this.jumping)
         {
         this.setVelocityX(0);
         }
@@ -104,7 +114,12 @@ export class Player extends Phaser.Physics.Matter.Sprite
         } else {
             this.anims.play('turn');
         }
+
+        if(!this.onLadder) {
+            this.climbing = false;
+        }
     }
+
     jump ()
     {
         if (Math.abs(this.body.velocity.y) < 0.5) {
@@ -120,5 +135,132 @@ export class Player extends Phaser.Physics.Matter.Sprite
                 this.setVelocityX(-4);
             }
         }
-    }    
+    }   
+
+    climb ()
+    {
+        this.setVelocityY(-1.5);
+    }
+
+    update(cursors, space)
+    {
+        // Reset jumping flag
+        if (Math.abs(this.body.velocity.y) < 0.5 && this.isGrounded){
+            this.jumping = false;
+        }
+
+        // Decrement cooldowns
+        if (this.jumpCooldown > 0 && this.isGrounded){
+            this.jumpCooldown -= 1;
+        }
+
+        if (this.bounceCooldown > 0){
+            this.bounceCooldown -= 1;
+        }
+
+        // Handle movement
+        if (cursors.left.isDown){
+            this.facing = 'left';
+            if (!this.jumping) {
+                this.moveLeft();
+            } else {
+                if (this.carrying){
+                    this.anims.play('leftPrincess', true);
+                } else {
+                    this.anims.play('left', true);
+                }
+            }
+        } else if (cursors.right.isDown) {
+            this.facing = 'right';
+            if (!this.jumping) {
+                this.moveRight();
+            } else {
+                if (this.carrying){
+                    this.anims.play('rightPrincess', true);
+                } else {
+                    this.anims.play('right', true);
+                }
+            }
+        } else if (!this.jumpCharging && !this.isGrounded) {
+            if (this.jumping) {
+                if (this.facing === 'right') {
+                    if (this.carrying){
+                        this.anims.play('rightPrincess', true);
+                    } else {
+                        this.anims.play('right', true);
+                    }
+                } else {
+                    if (this.carrying){
+                        this.anims.play('leftPrincess', true);
+                    } else {
+                        this.anims.play('left', true);
+                    }
+                }
+            }
+        } else if (!this.jumpCharging && !this.jumping){
+            this.idle();
+        }
+
+        // Handle charging
+        if (space.isDown && this.isGrounded && this.jumpCooldown == 0 && !this.climbing){
+            this.idle();
+            if (this.carrying) {
+                if (this.facing === 'right'){
+                    this.setTexture('dudeCPRight');
+                } else {
+                    this.setTexture('dudeCPLeft');
+                }
+            } else {
+                if (this.facing === 'right'){
+                    this.setTexture('dudeCrouchRight');
+                } else {
+                    this.setTexture('dudeCrouchLeft');
+                }
+            }
+            this.jumpCharging = true;
+            if (this.charge > -12){
+                this.charge -= 0.2;
+            }
+        }
+
+        // Handle jump release
+        if (space.isUp && this.jumpCharging == true){
+            this.jump();
+            this.setTexture('dude');
+            this.jumpCharging = false;
+            this.charge = 0;
+        }
+
+        // World boundary bounce
+        if (this.bounceCooldown === 0 && !this.isGrounded && !this.climbing) {
+            if ((this.x <= 30 && Math.abs(this.body.velocity.x) < 1) || 
+                (this.x >= 770 && Math.abs(this.body.velocity.x) < 1)) {
+                
+                if (this.x <= 30) {
+                    this.setVelocityX(4);
+                    this.setVelocityY(this.body.velocity.y * 0.5);
+                    this.bounceCooldown = 20;
+                } else if (this.x >= 770) {
+                    this.setVelocityX(-4);
+                    this.setVelocityY(this.body.velocity.y * 0.5);
+                    this.bounceCooldown = 20;
+                }
+            }
+        }
+
+        // Handle ladder climbing
+        if (cursors.up.isDown && this.onLadder){
+            this.climb();
+            if (this.carrying) {
+                this.setTexture('dudeCP');
+            } else {
+                this.setTexture('dudeCrouch');
+            }
+            this.climbing = true;
+
+            if (!cursors.left.isDown && !cursors.right.isDown) {
+                this.setVelocityX(this.body.velocity.x * 0.8);
+            }
+        }
+    }
 }
