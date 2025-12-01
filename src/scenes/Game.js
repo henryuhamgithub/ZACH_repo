@@ -27,10 +27,10 @@ export class Game extends Phaser.Scene {
         this.matter.add.gameObject(platform4, { isStatic: true, label: 'platform' });
 
         //create slopes
-        const shapes = this.cache.json.get('slopeShapes');
-        let slopeSprite = this.add.image(250, 1400, 'slope');
-        this.matter.add.gameObject(slopeSprite, {
-            shape: shapes.slope,
+        const shapes = this.cache.json.get('slope135Shapes');
+        let slope135Sprite = this.add.image(250, 1400, 'slope135');
+        this.matter.add.gameObject(slope135Sprite, {
+            shape: shapes.slope135,
             isStatic: true,
             label: 'platform'
         });
@@ -38,6 +38,18 @@ export class Game extends Phaser.Scene {
         //create ladders
         let ladder1 = this.add.image(750, 1530, 'ladder');
         this.matter.add.gameObject(ladder1, { isStatic: true, isSensor: true, label: 'ladder' });
+
+        //create buttons and button enabling stuff in pairs
+        let buttonSlope1 = this.add.image(500, 1100, 'slope135Invis');
+        this.matter.add.gameObject(buttonSlope1, {shape: shapes.slope135, isStatic: true, isSensor: true, label: 'platform'} );
+        buttonSlope1.setData('enabledTexture', 'slope135');
+
+        let button1 = this.add.image(24, 1700, 'buttonSide');
+        this.matter.add.gameObject(button1, {isStatic: true, isSensor: true, label: 'button'});
+        button1.setData('controlledPlatform', buttonSlope1);  // Link button to its platform
+        button1.setData('isPressed', false);
+        button1.setData('pressedTexture', 'buttonSidePressed')
+        
 
         //player and princess
         this.player = new Player(this, 100, 1850);
@@ -99,6 +111,22 @@ export class Game extends Phaser.Scene {
                     }
                 }
 
+                //player collision with button
+                const otherBody5 = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
+                if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody5.label === 'button') {
+                    
+                    // Get the game object from the body
+                    const buttonObj = otherBody5.gameObject;
+                    
+                    if (!buttonObj.getData('isPressed')) { 
+                        const controlledPlatform = buttonObj.getData('controlledPlatform');
+                        buttonObj.setData('isPressed', true);
+                        buttonObj.setTexture(buttonObj.getData('pressedTexture'))
+                        controlledPlatform.setSensor(false);
+                        controlledPlatform.setTexture(controlledPlatform.getData('enabledTexture'));
+                    }
+                }
+
             });
         });
 
@@ -128,6 +156,7 @@ export class Game extends Phaser.Scene {
 
         
         this.matter.world.on('collisionactive', (event) => {
+
             event.pairs.forEach((pair) => {
 
                 //player wall bounce
@@ -158,6 +187,7 @@ export class Game extends Phaser.Scene {
                 }
 
             });
+
         });
 
         this.cursors = this.input.keyboard.createCursorKeys();
@@ -169,127 +199,17 @@ export class Game extends Phaser.Scene {
         
     update() 
     {
-        var player = this.player;
-        var cursors = this.cursors;
-        var space = this.input.keyboard.addKey('Space');
-        var princess = this.princess
-        var xKey = this.input.keyboard.addKey('X');
+        const player = this.player;
+        const princess = this.princess;
+        const cursors = this.cursors;
+        const space = this.input.keyboard.addKey('Space');
+        const xKey = this.input.keyboard.addKey('X');
 
-        // Reset jumping flag FIRST
-        if (Math.abs(player.body.velocity.y) < 0.5 && player.isGrounded){
-            player.jumping = false;
-        }
+        // Update player and princess
+        player.update(cursors, space);
+        princess.update();
 
-        // Decrement jump jump and bounce cooldowns
-        if (player.jumpCooldown > 0 && player.isGrounded){
-            player.jumpCooldown -=1 ;
-        }
-
-        if (princess.bounceCooldown > 0){
-            princess.bounceCooldown -=1 ;
-        }
-
-        if (player.bounceCooldown > 0){
-            player.bounceCooldown -=1;
-        }
-
-        // Handle movement
-        if (cursors.left.isDown){
-            player.facing = 'left';
-            if (!player.jumping) {
-                player.moveLeft();
-            } else {
-                if (player.carrying){
-                    player.anims.play('leftPrincess', true);
-                } else {
-                    player.anims.play('left', true);
-                }
-            }
-        }else if (cursors.right.isDown) {
-            player.facing = 'right';
-            if (!player.jumping) {
-                player.moveRight();
-            } else {
-                if (player.carrying){
-                    player.anims.play('rightPrincess', true);
-                } else {
-                    player.anims.play('right', true);
-                }
-            }
-        } else if (!player.jumpCharging && !player.isGrounded) {
-            if (player.jumping) {
-                if (player.facing === 'right') {
-                    if (player.carrying){
-                        player.anims.play('rightPrincess', true);
-                    } else {
-                        player.anims.play('right', true);
-                    }
-                } else {
-                    if (player.carrying){
-                        player.anims.play('leftPrincess', true);
-                    } else {
-                        player.anims.play('left', true);
-                    }
-                }
-            }
-        }else if (!player.jumpCharging && !player.jumping){
-            player.idle();
-        }
-
-        // Handle charging and then jumping
-        if (space.isDown && player.isGrounded && player.jumpCooldown == 0 && !player.climbing){
-            player.idle();
-            if (player.carrying) {
-                player.setTexture('dudeCP');
-            } else{
-                player.setTexture('dudeCrouch');
-            }
-            player.jumpCharging = true;
-            if (player.charge > -12){
-                player.charge -=.2;
-            }
-        }
-
-        if (space.isUp && player.jumpCharging == true){
-            player.jump();
-            player.setTexture('dude');
-            player.jumpCharging = false;
-            player.charge = 0;
-        }
-
-        // Player world boundary bounce
-        if (player.bounceCooldown === 0 && !player.isGrounded && !player.climbing) {
-            if ((player.x <= 30 && Math.abs(player.body.velocity.x) < 1) || 
-                (player.x >= 770 && Math.abs(player.body.velocity.x) < 1)) {
-                
-                if (player.x <= 30) {
-                    player.setVelocityX(4);
-                    player.setVelocityY(player.body.velocity.y * 0.5);
-                    player.bounceCooldown = 20;
-                } else if (player.x >= 770) {
-                    player.setVelocityX(-4);
-                    player.setVelocityY(player.body.velocity.y * 0.5);
-                    player.bounceCooldown = 20;
-                }
-            }
-        }
-
-        //handle ladder climbing
-        if (cursors.up.isDown && player.onLadder){
-            player.climb();
-            if (player.carrying) {
-                player.setTexture('dudeCP');
-            } else{
-                player.setTexture('dudeCrouch');
-            }
-            player.climbing = true;
-
-            if (!cursors.left.isDown && !cursors.right.isDown) {
-                player.setVelocityX(player.body.velocity.x * 0.8);
-            }
-        }
-
-        //throw princess
+        // Throw princess 
         if (xKey.isDown && player.carrying && !player.climbing){
             princess.setVisible(true);
             princess.setStatic(false);
@@ -299,52 +219,11 @@ export class Game extends Phaser.Scene {
             if (player.facing == 'right') {
                 princess.throwRight();
             } else if (player.facing == 'left') {
-            princess.throwLeft();
+                princess.throwLeft();
             }
 
             player.carrying = false;
-            princess.bounce = -5
-        }
-
-        //princess bounce
-        if (princess.isGrounded && princess.body.velocity.y >= 0 && princess.bounceCooldown === 0){
-            if (Math.abs(princess.body.velocity.x) > 0.5 || Math.abs(princess.body.velocity.y) > 0) {
-                princess.setVelocityY(princess.bounce); 
-                princess.setVelocityX(princess.body.velocity.x * 0.5);
-                princess.bounce *= 0.5;
-                princess.bounceCooldown = 20;  
-            } else {
-                princess.setVelocityX(0);
-            }
-            princess.setTexture('princess');
-        }
-
-        // Princess world boundary bounce
-        if (princess.bounceCooldown === 0) {
-            const prevVelX = princess.body.velocity.x;
-            
-            // Check if at boundary with very low velocity (just hit wall)
-            if ((princess.x <= 30 && Math.abs(princess.body.velocity.x) < 1) || 
-                (princess.x >= 770 && Math.abs(princess.body.velocity.x) < 1)) {
-                
-                if (princess.x <= 30) {
-                    princess.setVelocityX(3);
-                    princess.setVelocityY(princess.body.velocity.y * 0.5);
-                    princess.bounceCooldown = 20;
-                } else if (princess.x >= 770) {
-                    princess.setVelocityX(-3);
-                    princess.setVelocityY(princess.body.velocity.y * 0.5);
-                    princess.bounceCooldown = 20;
-                }
-            }
-        }
-
-        //manual princess friction
-        if (princess.isGrounded && Math.abs(princess.body.velocity.x) > 0 && Math.abs(princess.body.velocity.y) < 1) {
-            princess.setVelocityX(princess.body.velocity.x * 0.95);
-            if (Math.abs(princess.body.velocity.x) < 0.5) {
-                princess.setVelocityX(0);
-            }
+            princess.bounce = -5;
         }
     }
     
