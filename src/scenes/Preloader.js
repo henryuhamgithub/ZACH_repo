@@ -29,16 +29,23 @@ export class Preloader extends Phaser.Scene {
         this.load.image('ground', 'platform.png');
         this.load.image('ladder', 'ladder.png');
 
-        this.load.json('slopeShapes', 'slope.json');
-        this.load.image('slope', 'slope.png');
+        this.load.json('slope135Shapes', 'slope135.json');
+        this.load.image('slope135', 'slope135.png');
+        this.load.image('slope135Invis', 'slope135Invis.png');
+
+        this.load.image('buttonSide', 'buttonSide.png');
+        this.load.image('buttonSidePressed', 'buttonSidePressed.png');
 
         this.load.spritesheet(
             'dude',
             'dude.png',
             {frameWidth: 32, frameHeight: 48}
         );
-        this.load.image('dudeCrouch', 'dudeCrouch.png');
-        this.load.image('dudeCP', 'dudeCrouchPrincess.png');
+
+        this.load.image('dudeCrouchRight', 'dudeCrouchRight.png');
+        this.load.image('dudeCrouchLeft', 'dudeCrouchLeft.png');
+        this.load.image('dudeCPRight', 'dudeCrouchPrincessRight.png');
+        this.load.image('dudeCPLeft', 'dudeCrouchPrincessLeft.png');
 
         this.load.image('princess', 'Princess.png');
         this.load.spritesheet(
