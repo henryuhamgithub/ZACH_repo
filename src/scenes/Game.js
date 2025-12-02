@@ -1,5 +1,7 @@
 import {Player} from '../gameObjects/Player.js'
 import {Princess} from '../gameObjects/Princess.js'
+import {Enemy} from "../gameObjects/Enemy.js"; 
+
 export class Game extends Phaser.Scene {
     constructor() {
         super('Game');
@@ -195,10 +197,109 @@ export class Game extends Phaser.Scene {
         this.matter.world.setBounds(0, 0, 800, 2000);
         this.cameras.main.setBounds(0, 0, 800, 2000);
         this.cameras.main.startFollow(this.player);
+        //-----------------------------------------------------------
+        // CREATE ENEMY POOL
+        //-----------------------------------------------------------
+        this.enemyPool = this.add.group({
+            classType: Enemy,
+            maxSize: 20,
+            runChildUpdate: true
+        });
+
+        //-----------------------------------------------------------
+        // SPAWN ENEMY FROM POOL
+        //-----------------------------------------------------------
+        this.enemy = this.enemyPool.get();
+        this.enemy.activate(400, 1600);
+
+
+        //-----------------------------------------------------------
+        // COLLISION: PLAYER vs ENEMY  (knockback + dropping princess)
+        //-----------------------------------------------------------
+        this.matter.world.on('collisionstart', (event) => {
+            event.pairs.forEach((pair) => {
+
+                const A = pair.bodyA.gameObject;
+                const B = pair.bodyB.gameObject;
+
+                if (!A || !B) return;
+
+                const enemy = this.enemy;
+
+                // player hits enemy
+                if (
+                    enemy.active &&
+                    ((A === this.player && B === enemy) ||
+                    (A === enemy && B === this.player))
+                ) {
+                    var player = this.player;
+                    var princess = this.princess;
+
+                    // tell enemy it hit the player and shouldn't die this frame
+                    enemy.markPlayerHit();
+
+                    // direction knockback
+                    const dx = player.x - enemy.x;
+                    const dy = player.y - enemy.y;
+                    const dir = dx < 0 ? -1 : 1;
+                    const dirY = dy < 0 ? -1 : 1;
+
+                    // drop princess 
+                    if (player.carrying) {
+                        princess.setVisible(true);
+                        princess.setStatic(false);
+                        princess.setSensor(false);
+                        princess.setPosition(player.x, player.y - 50);
+
+                        if (player.facing == 'right') {
+                            princess.throwRight();
+                        } else if (player.facing == 'left') {
+                            princess.throwLeft();
+                        }
+
+                        player.carrying = false;
+                        princess.bounce = -5;
+                    }
+
+                    // knockback
+                    player.setVelocity(dir * 3, dirY * 3);
+                }
+
+            });
+        });
+
+
+        //-----------------------------------------------------------
+        // COLLISION: PRINCESS vs ENEMY  (kills enemy)
+        //-----------------------------------------------------------
+        this.matter.world.on('collisionstart', (event) => {
+            event.pairs.forEach((pair) => {
+
+                const A = pair.bodyA.gameObject;
+                const B = pair.bodyB.gameObject;
+
+                if (!A || !B) return;
+
+                const enemy = this.enemy;
+
+                // princess hits enemy
+                if (
+                    enemy.active &&
+                    (!enemy.recentlyHitPlayer) &&
+                    ((A === this.princess && B === enemy) ||
+                    (A === enemy && B === this.princess))
+                ) {
+                    enemy.die();   // returns to pool
+                }
+            });
+        });
     }
         
     update() 
     {
+
+        this.enemy.update(this.player);
+
         const player = this.player;
         const princess = this.princess;
         const cursors = this.cursors;
