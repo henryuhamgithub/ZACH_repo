@@ -6,14 +6,14 @@ import { Preloader } from './scenes/Preloader.js';
 const config = {
     type: Phaser.AUTO,
     width: 800,
-    height: 600,
+    height: 800,
     parent: 'game-container',
     backgroundColor: '#028af8',
     physics: {
-        default: 'arcade',
-        arcade: {
+        default: 'matter',
+        matter: {
             debug: false,
-            gravity: { y: 500 }
+            gravity: { y: 1 }
         }
     },
     scale: {
