@@ -8,15 +8,16 @@ export class Enemy extends Phaser.Physics.Matter.Sprite {
         this.setFrictionAir(0.05);
 
         this.speed = 1;                
-        this.patrolDistance = 120;
+        this.patrolDistance = 420;
         this.originX = x;
         this.direction = 1;
 
         this.chaseRange = 200;
-        this.chaseSpeed = 1;
-        this.chaseVertical = 1;
+        this.chaseSpeed = 1.5;
+        this.chaseVertical = 1.5;
         this.recentlyHitPlayer = false;
 
+        this.setOnCollide(this.handleCollision.bind(this));
 
         // Pool defaults
         this.active = false;
@@ -64,33 +65,74 @@ export class Enemy extends Phaser.Physics.Matter.Sprite {
     });
     }
 
-    update(player) {
-        if (!this.active) return;  // <-- required for pool safety
+    handleCollision(data) {
+    const { collision, bodyA, bodyB } = data;
 
-        const dx = player.x - this.x;
-        const dy = player.y - this.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+    // Don't flip direction while chasing
+    if (this.isChasing) return;
 
-        // --- Chase player ---
-        if (dist < this.chaseRange) {
-            const dir = dx < 0 ? -1 : 1;
-            const dirY = dy < 0 ? -1 : 1;
-            this.setVelocity(dir * this.chaseSpeed, dirY * this.chaseVertical);
-            this.flipX = dir < 0;
-            return;
-        }
+    const other = bodyA === this.body ? bodyB : bodyA;
 
-        // --- Horizontal Patrol ---
-        this.setVelocity(this.direction * this.speed, this.body.velocity.y);
+    // Only care about static platforms/walls
+    if (!other.isStatic) return;
 
-        if (this.x >= this.originX + this.patrolDistance) {
-            this.direction = -1;
-            this.flipX = true;
-        }
-        else if (this.x <= this.originX - this.patrolDistance) {
-            this.direction = 1;
-            this.flipX = false;
-        }
+    // Check collision normal to avoid flipping on top/bottom collisions
+    const nx = collision.normal.x;
+
+    // If |nx| < 0.5 then it's a top or bottom hit → ignore
+    if (Math.abs(nx) < 0.5) {
+        return;
     }
+
+    // Side collision → flip direction
+    this.direction *= -1;
+    }
+
+
+
+ update(player) {
+    if (!this.active) return;
+
+    const dx = player.x - this.x;
+    const dy = player.y - this.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+
+    // ---- Chase Player ----
+    if (dist < this.chaseRange) {
+        this.isChasing = true;
+
+        const dirX = dx < 0 ? -1 : 1;
+        const dirY = dy < 0 ? -1 : 1;
+
+        this.setVelocity(dirX * this.chaseSpeed, dirY * this.chaseVertical);
+        this.flipX = dirX < 0;
+        return;
+    }
+    else {
+        this.isChasing = false;
+    }   
+
+    if (!this.isChasing){
+    // ---- Patrol Movement ----
+    this.setVelocityX(this.direction * this.speed);
+    this.flipX = this.direction < 0;
+
+    // Border bounce
+    const leftEdge = 10;
+    const rightEdge = this.scene.scale.width - 10;
+
+    if (this.x < leftEdge) this.direction = 1;
+    else if (this.x > rightEdge) this.direction = -1;
+
+    // Patrol bounds
+    if (this.x >= this.originX + this.patrolDistance) {
+        this.direction = -1;
+    } 
+    else if (this.x <= this.originX - this.patrolDistance) {
+        this.direction = 1;
+    }
+    }
+}
+
         
 }
