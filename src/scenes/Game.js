@@ -1,7 +1,6 @@
 import {Player} from '../gameObjects/Player.js'
 import {Princess} from '../gameObjects/Princess.js'
-import {Enemy} from "../gameObjects/Enemy.js"; 
-
+import {Enemy} from '../gameObjects/Enemy.js'
 export class Game extends Phaser.Scene {
     constructor() {
         super('Game');
@@ -9,25 +8,25 @@ export class Game extends Phaser.Scene {
 
     create() 
     {
-        this.add.image(400,1700, 'sky');
+        this.add.image(400,2500, 'levelBackground');
 
-        // Create ground
-        let groundSprite = this.add.tileSprite(400, 1968, 1600, 64, 'ground');
-        this.matter.add.gameObject(groundSprite, { isStatic: true, label: 'platform' });
-    
-        // Create platforms
-        let platform1 = this.add.image(600, 1800, 'ground');
+        //
+        //LEVEL 1
+        //
+
+        let ground = this.add.image(400, 4983, 'base1');
+        this.matter.add.gameObject(ground, { isStatic: true, label: 'platform' });
+
+        let platform1 = this.add.image(35, 4675, 'base1');
         this.matter.add.gameObject(platform1, { isStatic: true, label: 'platform' });
-    
-        let platform2 = this.add.image(50, 1650, 'ground');
-        this.matter.add.gameObject(platform2, { isStatic: true, label: 'platform' });
-    
-        let platform3 = this.add.image(750, 1620, 'ground');
-        this.matter.add.gameObject(platform3, { isStatic: true, label: 'platform' });
 
-        let platform4 = this.add.image(520, 1480, 'ground');
-        this.matter.add.gameObject(platform4, { isStatic: true, label: 'platform' });
+        let platform2 = this.add.image(640, 4550, 'base2small');
+        this.matter.add.gameObject(platform2, { isStatic: true, label: 'platform' })
 
+        let ladder1 = this.add.image(475, (5000-175-17), 'ladderLongLvl1');
+        this.matter.add.gameObject(ladder1, { isStatic: true, isSensor: true, label: 'ladder' });
+    
+        
         //create slopes
         const shapes = this.cache.json.get('slope135Shapes');
         let slope135Sprite = this.add.image(250, 1400, 'slope135');
@@ -36,10 +35,7 @@ export class Game extends Phaser.Scene {
             isStatic: true,
             label: 'platform'
         });
-
-        //create ladders
-        let ladder1 = this.add.image(750, 1530, 'ladder');
-        this.matter.add.gameObject(ladder1, { isStatic: true, isSensor: true, label: 'ladder' });
+        
 
         //create buttons and button enabling stuff in pairs
         let buttonSlope1 = this.add.image(500, 1100, 'slope135Invis');
@@ -54,8 +50,8 @@ export class Game extends Phaser.Scene {
         
 
         //player and princess
-        this.player = new Player(this, 100, 1850);
-        this.princess = new Princess(this, 150, 1850);
+        this.player = new Player(this, 100, 4850);
+        this.princess = new Princess(this, 400, 4850);
 
         
         this.matter.world.on('collisionstart', (event) => {
@@ -120,7 +116,23 @@ export class Game extends Phaser.Scene {
                     // Get the game object from the body
                     const buttonObj = otherBody5.gameObject;
                     
-                    if (!buttonObj.getData('isPressed')) { 
+                    if (!buttonObj.getData('isPressed')) {  // Only activate once
+                        const controlledPlatform = buttonObj.getData('controlledPlatform');
+                        buttonObj.setData('isPressed', true);
+                        buttonObj.setTexture(buttonObj.getData('pressedTexture'))
+                        controlledPlatform.setSensor(false);
+                        controlledPlatform.setTexture(controlledPlatform.getData('enabledTexture'));
+                    }
+                }
+
+                //princess collision with button
+                const otherBody6 = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
+                if ((pair.bodyA === this.princess.body || pair.bodyB === this.princess.body) && otherBody6.label === 'button') {
+                    
+                    // Get the game object from the body
+                    const buttonObj = otherBody6.gameObject;
+                    
+                    if (!buttonObj.getData('isPressed')) {  // Only activate once
                         const controlledPlatform = buttonObj.getData('controlledPlatform');
                         buttonObj.setData('isPressed', true);
                         buttonObj.setTexture(buttonObj.getData('pressedTexture'))
@@ -194,9 +206,10 @@ export class Game extends Phaser.Scene {
 
         this.cursors = this.input.keyboard.createCursorKeys();
 
-        this.matter.world.setBounds(0, 0, 800, 2000);
-        this.cameras.main.setBounds(0, 0, 800, 2000);
+        this.matter.world.setBounds(0, 0, 800, 5000);
+        this.cameras.main.setBounds(0, 0, 800, 5000);
         this.cameras.main.startFollow(this.player);
+
         //-----------------------------------------------------------
         // CREATE ENEMY POOL
         //-----------------------------------------------------------
@@ -210,7 +223,7 @@ export class Game extends Phaser.Scene {
         // SPAWN ENEMY FROM POOL
         //-----------------------------------------------------------
         this.enemy = this.enemyPool.get();
-        this.enemy.activate(400, 1600);
+        this.enemy.activate(700, 4850);
 
 
         //-----------------------------------------------------------
@@ -293,13 +306,11 @@ export class Game extends Phaser.Scene {
                 }
             });
         });
+
     }
         
     update() 
     {
-
-        this.enemy.update(this.player);
-
         const player = this.player;
         const princess = this.princess;
         const cursors = this.cursors;
@@ -315,7 +326,7 @@ export class Game extends Phaser.Scene {
             princess.setVisible(true);
             princess.setStatic(false);
             princess.setSensor(false);
-            princess.setPosition(player.x, player.y - 50);
+            princess.setPosition(player.x, player.y - 150);
 
             if (player.facing == 'right') {
                 princess.throwRight();
@@ -338,6 +349,6 @@ export class Game extends Phaser.Scene {
         this.princess.setSensor(true);
         this.princess.setPosition(-100, -100);
         this.player.carrying = true;
-        this.player.setTexture('dudePrincess');
+        //this.player.setTexture('dudePrincess');
     }
 }
