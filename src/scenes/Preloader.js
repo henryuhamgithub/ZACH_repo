@@ -25,9 +25,22 @@ export class Preloader extends Phaser.Scene {
     preload() {
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
-        this.load.image('sky', 'sky.png');
-        this.load.image('ground', 'platform.png');
-        this.load.image('ladder', 'ladder.png');
+
+        //
+        //WORLD OBJECTS
+        //
+        this.load.image('levelBackground', 'levelBackground.png');
+        this.load.image('base1','base1.png');
+        this.load.image('base2','base2.png');
+        this.load.image('base2small','base2small.png');
+        this.load.image('base3','base3.png');
+        this.load.image('base4','base4.png');
+        this.load.image('base5','base5.png');
+        this.load.image('base6','base6.png');
+        this.load.image('base7','base7.png');
+        this.load.image('ladderLongLvl1', 'ladderLongLvl1.png');
+
+
 
         this.load.json('slope135Shapes', 'slope135.json');
         this.load.image('slope135', 'slope135.png');
@@ -36,25 +49,35 @@ export class Preloader extends Phaser.Scene {
         this.load.image('buttonSide', 'buttonSide.png');
         this.load.image('buttonSidePressed', 'buttonSidePressed.png');
 
+        //
+        //PLAYER SPRITES AND SPRITESHEETS
+        //
+
+        this.load.image('knight', 'knightDemo.png');
         this.load.spritesheet(
             'dude',
             'dude.png',
             {frameWidth: 32, frameHeight: 48}
         );
-
+        this.load.spritesheet(
+                    'dudePrincess',
+                    'dudePrincess.png',
+                    {frameWidth: 32, frameHeight: 48}
+                );
         this.load.image('dudeCrouchRight', 'dudeCrouchRight.png');
         this.load.image('dudeCrouchLeft', 'dudeCrouchLeft.png');
         this.load.image('dudeCPRight', 'dudeCrouchPrincessRight.png');
         this.load.image('dudeCPLeft', 'dudeCrouchPrincessLeft.png');
 
-        this.load.image('princess', 'Princess.png');
-        this.load.spritesheet(
-            'dudePrincess',
-            'dudePrincess.png',
-            {frameWidth: 32, frameHeight: 48}
-        );
+        //
+        //PRINCESS SPRITES
+        //
+
+        this.load.image('princess', 'princessDemo.png');
         this.load.image('princessAirLeft', 'princessAirLeft.png');
         this.load.image('princessAirRight', 'princessAirRight.png');
+        this.load.image('princessBounceLeft', 'princessBounceLeft.png');
+        this.load.image('princessBounceRight', 'princessBounceRight.png');
     }
 
     create() {
