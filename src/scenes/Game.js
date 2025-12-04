@@ -8,7 +8,8 @@ export class Game extends Phaser.Scene {
 
     create() 
     {
-        this.add.image(400,2500, 'levelBackground');
+        //this.add.image(400,2500, 'layout');
+        this.add.image(400,2500,'levelBackground');
 
         //
         //LEVEL 1
@@ -17,16 +18,35 @@ export class Game extends Phaser.Scene {
         let ground = this.add.image(400, 4983, 'base1');
         this.matter.add.gameObject(ground, { isStatic: true, label: 'platform' });
 
-        let platform1 = this.add.image(35, 4675, 'base1');
+        //let platform2 = this.add.image(640, 4550, 'base1small');
+        //this.matter.add.gameObject(platform2, { isStatic: true, label: 'platform' });
+
+        const shapes1 = this.cache.json.get('building1shapes');
+        let building1 = this.add.image(270, 4300, 'building1');
+        this.matter.add.gameObject(building1, {
+            shape: shapes1.building1,
+            isStatic: true,
+            label: 'platform'
+        });
+
+        let platform1 = this.add.image(-130, 4665, 'base1');
         this.matter.add.gameObject(platform1, { isStatic: true, label: 'platform' });
 
-        let platform2 = this.add.image(640, 4550, 'base2small');
-        this.matter.add.gameObject(platform2, { isStatic: true, label: 'platform' })
+        let platform3 = this.add.image(385,4665, 'base1tiny');
+        this.matter.add.gameObject(platform3, { isStatic: true, label: 'platform' });
 
-        let ladder1 = this.add.image(475, (5000-175-17), 'ladderLongLvl1');
+        let ladder1 = this.add.image(315, (5000-175-17), 'ladderLongLvl1');
         this.matter.add.gameObject(ladder1, { isStatic: true, isSensor: true, label: 'ladder' });
-    
+
+        let platform4 = this.add.image(420,4200, 'base2small');
+        this.matter.add.gameObject(platform4, { isStatic: true, label: 'platform' });
+
+        let platform5 = this.add.image(100,4080, 'base2small');
+        this.matter.add.gameObject(platform5, { isStatic: true, label: 'platform' });
         
+        let ladder2 = this.add.image(110, 4509, 'ladderShortLvl1');
+        this.matter.add.gameObject(ladder2, { isStatic: true, isSensor: true, label: 'ladder' });
+
         //create slopes
         const shapes = this.cache.json.get('slope135Shapes');
         let slope135Sprite = this.add.image(250, 1400, 'slope135');
@@ -157,6 +177,7 @@ export class Game extends Phaser.Scene {
                 if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody2.label === 'ladder') {
                     this.player.onLadder = false;
                     this.player.climbing = false;
+                    this.player.setVelocityX(0);
                 }
                 
                 //princess
@@ -223,7 +244,19 @@ export class Game extends Phaser.Scene {
         // SPAWN ENEMY FROM POOL
         //-----------------------------------------------------------
         this.enemy = this.enemyPool.get();
-        this.enemy.activate(700, 4850);
+        this.enemy.activate(700, 4750);
+
+        this.enemy = this.enemyPool.get();
+        this.enemy.activate(640, 4450);
+
+        this.enemy = this.enemyPool.get();
+        this.enemy.activate(640, 4150);
+
+        this.enemy = this.enemyPool.get();
+        this.enemy.activate(300, 4100);
+
+        this.enemy = this.enemyPool.get();
+        this.enemy.activate(400, 3600);
 
 
         //-----------------------------------------------------------
