@@ -26,11 +26,15 @@ export class Preloader extends Phaser.Scene {
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
 
+        this.load.image('layout', 'levelbackgrounglayout.png');
+
         //
         //WORLD OBJECTS
         //
         this.load.image('levelBackground', 'levelBackground.png');
         this.load.image('base1','base1.png');
+        this.load.image('base1small','base1small.png');
+        this.load.image('base1tiny','base1tiny.png');
         this.load.image('base2','base2.png');
         this.load.image('base2small','base2small.png');
         this.load.image('base3','base3.png');
@@ -39,6 +43,9 @@ export class Preloader extends Phaser.Scene {
         this.load.image('base6','base6.png');
         this.load.image('base7','base7.png');
         this.load.image('ladderLongLvl1', 'ladderLongLvl1.png');
+        this.load.image('ladderShortLvl1', 'ladderShortLvl1.png');
+        this.load.json('building1shapes', 'evil.json');
+        this.load.image('building1', 'evil.png');
 
 
 
@@ -78,6 +85,12 @@ export class Preloader extends Phaser.Scene {
         this.load.image('princessAirRight', 'princessAirRight.png');
         this.load.image('princessBounceLeft', 'princessBounceLeft.png');
         this.load.image('princessBounceRight', 'princessBounceRight.png');
+
+        //
+        //ENEMY SPRITE
+        //
+
+        this.load.image('enemyDemo', 'enemyDemo.png');
     }
 
     create() {
