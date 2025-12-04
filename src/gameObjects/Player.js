@@ -113,7 +113,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
     {
        if (!this.jumping)
         {
-        this.setVelocityX(0);
+            this.setVelocityX(0);
         }
         if (this.carrying) {
             //this.anims.play('turnPrincess');
@@ -152,6 +152,21 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
     update(cursors, space)
     {
+        if (!this.onLadder && !this.isGrounded) {
+            // Do a quick check: are we extremely close to a platform vertically?
+            // This catches edge cases where collision didn't fire
+        const groundCheck = this.scene.matter.overlap(this.body, 
+            this.scene.matter.world.localWorld.bodies.filter(b => b.label === 'platform')
+        );
+        if (groundCheck) {
+            this.isGrounded = true;
+        }
+}
+
+        if (!this.onLadder) {
+            this.climbing = false;
+        }
+
         // Reset jumping flag
         if (Math.abs(this.body.velocity.y) < 0.5 && this.isGrounded){
             this.jumping = false;
@@ -268,9 +283,9 @@ export class Player extends Phaser.Physics.Matter.Sprite
         if (cursors.up.isDown && this.onLadder){
             this.climb();
             if (this.carrying) {
-                this.setTexture('dudeCPRight');
+                //this.setTexture('dudeCPRight');
             } else {
-                this.setTexture('dudeCrouchRight');
+                //this.setTexture('dudeCrouchRight');
             }
             this.climbing = true;
 
@@ -278,5 +293,6 @@ export class Player extends Phaser.Physics.Matter.Sprite
                 this.setVelocityX(this.body.velocity.x * 0.8);
             }
         }
+
     }
 }
