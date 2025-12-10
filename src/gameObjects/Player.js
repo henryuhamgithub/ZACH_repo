@@ -26,6 +26,8 @@ export class Player extends Phaser.Physics.Matter.Sprite
         this.carrying = false;
         this.onLadder = false;
         this.climbing = true;
+
+        this.label === 'knight';
     }
 
     initAnimations ()
