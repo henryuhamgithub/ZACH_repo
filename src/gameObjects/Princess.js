@@ -14,6 +14,8 @@ export class Princess extends Phaser.Physics.Matter.Sprite
         this.bounce = -1;
         this.bounceCooldown = 0;
         this.isGrounded = false;
+
+        this.label === 'princess';
     }
 
     throwRight () {
