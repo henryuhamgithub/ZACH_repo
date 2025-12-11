@@ -323,6 +323,7 @@ export class Game extends Phaser.Scene {
                 const otherBody3 = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
                 if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody3 === this.princess.body) {
                     this.pickupPrincess(this.player, this.princess);
+                    this.player.idle();
                 }
 
                 //princess wall bounce
@@ -609,21 +610,32 @@ export class Game extends Phaser.Scene {
         princess.update();
 
         // Throw princess 
-        if (xKey.isDown && player.carrying && !player.climbing){
-            princess.setVisible(true);
-            princess.setStatic(false);
-            princess.setSensor(false);
-            princess.setPosition(player.x, player.y - 150);
-
-            if (player.facing == 'right') {
+        if (Phaser.Input.Keyboard.JustDown(xKey) && player.carrying && !player.climbing){
+        player.startThrow();
+        
+        const updateHandler = (animation, frame) => {
+            if (animation.key === 'throwRight' && frame.index === 9) {  
+                princess.setVisible(true);
+                princess.setStatic(false);
+                princess.setSensor(false);
+                princess.setPosition(player.x + 50, player.y - 100);
                 princess.throwRight();
-            } else if (player.facing == 'left') {
+                princess.bounce = -5;
+                player.off('animationupdate', updateHandler);
+            } else if (animation.key === 'throwLeft' && frame.index === 9) {  
+                princess.setVisible(true);
+                princess.setStatic(false);
+                princess.setSensor(false);
+                princess.setPosition(player.x - 50, player.y - 100);
                 princess.throwLeft();
+                princess.bounce = -5;
+                player.off('animationupdate', updateHandler);
             }
-
-            player.carrying = false;
-            princess.bounce = -5;
+        };
+        
+        player.on('animationupdate', updateHandler);
         }
+
     }
     
     pickupPrincess(player, Princess)

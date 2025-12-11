@@ -6,7 +6,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
         scene.add.existing(this);
 
-        this.setRectangle(60, 140);
+        this.setRectangle(50, 140);
 
         this.setFixedRotation();
 
@@ -26,6 +26,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
         this.carrying = false;
         this.onLadder = false;
         this.climbing = true;
+        this.throwing = false;
 
         this.label === 'knight';
     }
@@ -33,46 +34,61 @@ export class Player extends Phaser.Physics.Matter.Sprite
     initAnimations ()
     {
         this.anims.create({
-            key: 'left',
-            frames: this.anims.generateFrameNumbers('dude', { start: 0, end: 3}),
-            frameRate: 10,
-            repeat: -1
-        })
-
-        this.anims.create({
-            key: 'turn',
-            frames: this.anims.generateFrameNumbers('dude', { start: 4, end: 4 }),
-            frameRate:10,
+            key: 'idleLeft',
+            frames: this.anims.generateFrameNumbers('knightIdle', { start: 3, end: 0 }),
+            frameRate: 12,
             repeat: -1,
         })
 
         this.anims.create({
-            key: 'right',
-            frames: this.anims.generateFrameNumbers('dude', { start: 5, end: 8}),
-            frameRate: 10,
+            key: 'idleRight',
+            frames: this.anims.generateFrameNumbers('knightIdle', { start: 4, end: 7 }),
+            frameRate: 12,
             repeat: -1,
         })
 
         this.anims.create({
-            key: 'leftPrincess',
-            frames: this.anims.generateFrameNumbers('dudePrincess', { start: 0, end: 3}),
-            frameRate: 10,
-            repeat: -1
-        })
-
-        this.anims.create({
-            key: 'turnPrincess',
-            frames: this.anims.generateFrameNumbers('dudePrincess', { start: 4, end: 4 }),
-            frameRate:10,
+            key: 'runLeft',
+            frames: this.anims.generateFrameNumbers('knightRun', { start: 5, end: 0}),
+            frameRate: 12,
             repeat: -1,
         })
 
         this.anims.create({
-            key: 'rightPrincess',
-            frames: this.anims.generateFrameNumbers('dudePrincess', { start: 5, end: 8}),
-            frameRate: 10,
+            key: 'runRight',
+            frames: this.anims.generateFrameNumbers('knightRun', { start: 6, end: 12}),
+            frameRate: 12,
             repeat: -1,
         })
+
+        this.anims.create({
+            key: 'throwLeft',
+            frames: this.anims.generateFrameNumbers('knightThrow', { start: 14, end: 0 }),
+            frameRate:12,
+            repeat: 0,
+        })
+
+        this.anims.create({
+            key: 'throwRight',
+            frames: this.anims.generateFrameNumbers('knightThrow', { start: 15, end: 29 }),
+            frameRate:12,
+            repeat: 0,
+        })
+
+        this.anims.create({
+            key: 'chargeLeft',
+            frames: this.anims.generateFrameNumbers('knightCharge', { start: 5, end: 0 }),
+            frameRate:12,
+            repeat: 0,
+        })
+
+        this.anims.create({
+            key: 'chargeRight',
+            frames: this.anims.generateFrameNumbers('knightCharge', { start: 6, end: 12 }),
+            frameRate:12,
+            repeat: 0,
+        })
+
     }
 
     moveLeft ()
@@ -84,11 +100,10 @@ export class Player extends Phaser.Physics.Matter.Sprite
         }
         
         if (this.carrying){
-            //this.anims.play('leftPrincess', true);
-            this.setTexture('knight');
+            //carrying animation
+            this.anims.play('runLeft', true);
         } else {
-            //this.anims.play('left', true);
-            this.setTexture('knight');
+            this.anims.play('runLeft', true);
         }
         this.facing = 'left';
     }
@@ -102,11 +117,10 @@ export class Player extends Phaser.Physics.Matter.Sprite
         }
 
         if (this.carrying) {
-            //this.anims.play('rightPrincess', true);
-            this.setTexture('knight');
+            //carrying animation
+            this.anims.play('runRight', true);
         } else {
-            //this.anims.play('right', true);
-            this.setTexture('knight');
+            this.anims.play('runRight', true);
         }
         this.facing = 'right';
     }
@@ -118,11 +132,19 @@ export class Player extends Phaser.Physics.Matter.Sprite
             this.setVelocityX(0);
         }
         if (this.carrying) {
-            //this.anims.play('turnPrincess');
-            this.setTexture('knight');
+            //carrying animation
+            if (this.facing == 'left'){
+                this.anims.play('idleLeft', true);
+            } else {
+                this.anims.play('idleRight', true);
+            }
         } else {
-            //this.anims.play('turn');
-            this.setTexture('knight');
+            if (this.facing == 'left'){
+                this.anims.play('idleLeft', true);
+            } else {
+                this.anims.play('idleRight', true);
+            }
+
         }
 
         if(!this.onLadder) {
@@ -139,10 +161,12 @@ export class Player extends Phaser.Physics.Matter.Sprite
             if (this.facing == 'right')
             {
                 this.setVelocityX(4);
+                this.anims.play('runRight', true);
             }
             else if (this.facing == 'left')
             {
                 this.setVelocityX(-4);
+                this.anims.play('runLeft', true);
             }
         }
     }   
@@ -154,6 +178,10 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
     update(cursors, space)
     {
+        if (this.throwing) {
+            return;
+        }
+
         if (!this.onLadder && !this.isGrounded) {
             // Do a quick check: are we extremely close to a platform vertically?
             // This catches edge cases where collision didn't fire
@@ -190,11 +218,10 @@ export class Player extends Phaser.Physics.Matter.Sprite
                 this.moveLeft();
             } else {
                 if (this.carrying){
-                    //this.anims.play('leftPrincess', true);
-                    this.setTexture('knight');
+                    //carrying animation
+                    this.anims.play('runLeft', true);
                 } else {
-                    //this.anims.play('left', true);
-                    this.setTexture('knight');
+                    this.anims.play('runLeft', true);
                 }
             }
         } else if (cursors.right.isDown) {
@@ -203,30 +230,27 @@ export class Player extends Phaser.Physics.Matter.Sprite
                 this.moveRight();
             } else {
                 if (this.carrying){
-                    //this.anims.play('rightPrincess', true);
-                    this.setTexture('knight');
+                    //carrying animation
+                    this.anims.play('runRight', true);
                 } else {
-                    //this.anims.play('right', true);
-                    this.setTexture('knight');
+                    this.anims.play('runRight', true);
                 }
             }
         } else if (!this.jumpCharging && !this.isGrounded) {
             if (this.jumping) {
                 if (this.facing === 'right') {
                     if (this.carrying){
-                        //this.anims.play('rightPrincess', true);
-                        this.setTexture('knight');
+                        //carrying animation should be here
+                        this.anims.play('runRight', true);
                     } else {
-                        //this.anims.play('right', true);
-                        this.setTexture('knight');
+                        this.anims.play('runRight', true);
                     }
                 } else {
                     if (this.carrying){
-                        //this.anims.play('leftPrincess', true);
-                        this.setTexture('knight');
+                        //carrying animation should be here
+                        this.anims.play('runLeft', true);
                     } else {
-                        //this.anims.play('left', true);
-                        this.setTexture('knight');
+                        this.anims.play('runLeft', true);
                     }
                 }
             }
@@ -239,15 +263,15 @@ export class Player extends Phaser.Physics.Matter.Sprite
             this.idle();
             if (this.carrying) {
                 if (this.facing === 'right'){
-                    //this.setTexture('dudeCPRight');
+                    //carrying texture
                 } else {
-                    //this.setTexture('dudeCPLeft');
+                    //carrying texture
                 }
             } else {
                 if (this.facing === 'right'){
-                    //this.setTexture('dudeCrouchRight');
+                    this.anims.play('chargeRight', true);
                 } else {
-                    //this.setTexture('dudeCrouchLeft');
+                    this.anims.play('chargeLeft', true);
                 }
             }
             this.jumpCharging = true;
@@ -259,7 +283,12 @@ export class Player extends Phaser.Physics.Matter.Sprite
         // Handle jump release
         if (space.isUp && this.jumpCharging == true){
             this.jump();
-            //this.setTexture('dude');
+            if (this.facing == 'left') {
+                this.anims.play('runLeft', true);
+            } else {
+                this.anims.play('runRight', true);
+            }
+
             this.jumpCharging = false;
             this.charge = 0;
         }
@@ -285,9 +314,10 @@ export class Player extends Phaser.Physics.Matter.Sprite
         if (cursors.up.isDown && this.onLadder){
             this.climb();
             if (this.carrying) {
-                //this.setTexture('dudeCPRight');
+                //carrying animation
+                this.setTexture('knight');
             } else {
-                //this.setTexture('dudeCrouchRight');
+                this.setTexture('knight');
             }
             this.climbing = true;
 
@@ -296,5 +326,36 @@ export class Player extends Phaser.Physics.Matter.Sprite
             }
         }
 
+        
+
     }
+
+    startThrow()
+    {
+        this.throwing = true;
+        this.setVelocityX(0);
+        
+        if (this.facing === 'right') {
+            if (this.x < 150) {
+                this.anims.play('throwLeft', true)
+            } else{
+                this.anims.play('throwRight', true);
+            } 
+        } else {
+            if (this.x > 650) {
+                this.anims.play('throwLeft', true)
+            } else{
+                this.anims.play('throwRight', true);
+            } 
+        }
+        
+        // Set up completion listener
+        this.once('animationcomplete', (animation) => {
+            if (animation.key === 'throwRight' || animation.key === 'throwLeft') {
+                this.throwing = false;
+                this.carrying = false;
+            }
+        });
+    }
+
 }

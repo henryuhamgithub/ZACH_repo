@@ -26,15 +26,13 @@ export class Preloader extends Phaser.Scene {
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
 
-        this.load.image('layout', 'levelbackgrounglayout.png');
-
         this.load.image('title', 'finaltitle.png');
         this.load.image('start', 'startbutton.png')
 
         //
         //WORLD OBJECTS
         //
-        this.load.image('levelBackground', 'levelBackgrounddetailedlayout.png');
+        this.load.image('levelBackground', 'levelBackground.png');
         this.load.image('base1','base1.png');
         this.load.image('base1small','base1small.png');
         this.load.image('base1tiny','base1tiny.png');
@@ -52,25 +50,25 @@ export class Preloader extends Phaser.Scene {
         this.load.image('base7','base7.png');
         this.load.image('ladderLongLvl1', 'ladderLongLvl1.png');
         this.load.image('ladderShortLvl1', 'ladderShortLvl1.png');
+
         this.load.json('building1shapes', 'evil.json');
         this.load.image('building1', 'evil.png');
+
         this.load.json('building2shapes', 'building2.json');
         this.load.image('building2', 'building2.png');
+
         this.load.json('building3shapes', 'penthouse.json');
         this.load.image('building3', 'building3.png');
-
-
 
         this.load.json('slopeLShapes', 'slopeLeft.json');
         this.load.json('slopeRShapes', 'slopeRight.json');
         this.load.image('slopeR', 'slope1.png');
         this.load.image('slopeL', 'slope2.png');
-        this.load.image('slope135Invis', 'slope135Invis.png');
 
         this.load.image('buttonSide', 'buttonnotpushed.png');
         this.load.image('buttonSidePressed', 'buttonpushed.png');
 
-        this.load.image('enemy', 'uglyahhenemy2.png');
+        
 
         //
         //PLAYER SPRITES AND SPRITESHEETS
@@ -78,35 +76,37 @@ export class Preloader extends Phaser.Scene {
 
         this.load.image('knight', 'knightDemo.png');
         this.load.spritesheet(
-            'dude',
-            'dude.png',
-            {frameWidth: 32, frameHeight: 48}
+            'knightRun',
+            'runknight.png',
+            {frameWidth: 147, frameHeight: 155}
         );
         this.load.spritesheet(
-                    'dudePrincess',
-                    'dudePrincess.png',
-                    {frameWidth: 32, frameHeight: 48}
-                );
-        this.load.image('dudeCrouchRight', 'dudeCrouchRight.png');
-        this.load.image('dudeCrouchLeft', 'dudeCrouchLeft.png');
-        this.load.image('dudeCPRight', 'dudeCrouchPrincessRight.png');
-        this.load.image('dudeCPLeft', 'dudeCrouchPrincessLeft.png');
+            'knightIdle',
+            'idleKnight.png',
+            {frameWidth: 147, frameHeight: 155}
+        );
+        this.load.spritesheet(
+            'knightCharge',
+            'crouchknightrevised.png',
+            {frameWidth: 147, frameHeight: 155}
+        );
+        this.load.spritesheet(
+            'knightThrow',
+            'throwknight.png',
+            {frameWidth: 147, frameHeight: 155}
+        );
 
         //
         //PRINCESS SPRITES
         //
 
-        this.load.image('princess', 'princessDemo.png');
-        this.load.image('princessAirLeft', 'princessAirLeft.png');
-        this.load.image('princessAirRight', 'princessAirRight.png');
-        this.load.image('princessBounceLeft', 'princessBounceLeft.png');
-        this.load.image('princessBounceRight', 'princessBounceRight.png');
+        this.load.image('princess', 'princessground.png');
 
         //
         //ENEMY SPRITE
         //
 
-        this.load.image('enemyDemo', 'enemyDemo.png');
+        this.load.image('enemy', 'uglyahhenemy2.png');
     }
 
     create() {

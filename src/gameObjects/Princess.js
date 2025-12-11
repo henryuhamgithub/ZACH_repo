@@ -6,6 +6,8 @@ export class Princess extends Phaser.Physics.Matter.Sprite
 
         scene.add.existing(this);
 
+        this.setRectangle(180,30)
+
         this.setFixedRotation();
 
         this.setFriction(0, 0, 0);
@@ -21,13 +23,13 @@ export class Princess extends Phaser.Physics.Matter.Sprite
     throwRight () {
         this.setVelocityX(5);
         this.setVelocityY(-5);
-        this.setTexture('princessAirRight');
+        //this.setTexture('princessAirRight');
     }
 
     throwLeft () {
         this.setVelocityX(-5);
         this.setVelocityY(-5);
-        this.setTexture('princessAirLeft');
+        //this.setTexture('princessAirLeft');
     }
 
     update()
