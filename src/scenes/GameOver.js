@@ -3,16 +3,18 @@ export class GameOver extends Phaser.Scene {
         super('GameOver');
     }
 
-    create() {
-        this.cameras.main.setBackgroundColor(0xff0000);
+      create() {
+        // Background
+        this.add.image(0, 0, 'endscreen').setOrigin(0);
+            
 
-        this.add.image(512, 384, 'background').setAlpha(0.5);
+        // Start Button
+        const restartBtn = this.add.image(this.scale.width / 2, 500, 'restart')
+            .setInteractive()
+            .setScale(1);
 
-        this.add.text(512, 384, 'Game Over', {
-            fontFamily: 'Arial Black', fontSize: 64, color: '#ffffff',
-            stroke: '#000000', strokeThickness: 8,
-            align: 'center'
-        }).setOrigin(0.5);
-
+        restartBtn.on('pointerdown', () => {
+            this.scene.start('Game');  // Go to main gameplay
+        });
     }
 }

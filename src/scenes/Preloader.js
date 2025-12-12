@@ -26,8 +26,10 @@ export class Preloader extends Phaser.Scene {
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
 
-        this.load.image('title', 'finaltitle.png');
+        this.load.image('title', 'titlefixed.png');
         this.load.image('start', 'startbutton.png')
+        this.load.image('endscreen', 'gameoverscreenfixed.png');
+        this.load.image('restart', 'tryagainbutton.png')
 
         //
         //WORLD OBJECTS
@@ -77,30 +79,48 @@ export class Preloader extends Phaser.Scene {
         this.load.image('knight', 'knightDemo.png');
         this.load.spritesheet(
             'knightRun',
-            'runknight.png',
+            'runwithoutprincess.png',
+            {frameWidth: 147, frameHeight: 155}
+        );
+        this.load.image('knight', 'knightDemo.png');
+        this.load.spritesheet(
+            'knightRunP',
+            'runwithprincess.png',
             {frameWidth: 147, frameHeight: 155}
         );
         this.load.spritesheet(
             'knightIdle',
-            'idleKnight.png',
+            'idlewithoutprincess.png',
+            {frameWidth: 147, frameHeight: 155}
+        );
+        this.load.spritesheet(
+            'knightChaPrin',
+            'chargePrin.png',
             {frameWidth: 147, frameHeight: 155}
         );
         this.load.spritesheet(
             'knightCharge',
-            'crouchknightrevised.png',
+            'chargeNoPrin.png',
             {frameWidth: 147, frameHeight: 155}
         );
         this.load.spritesheet(
             'knightThrow',
-            'throwknight.png',
+            'throwwithprincess.png',
             {frameWidth: 147, frameHeight: 155}
         );
+        this.load.spritesheet(
+            'knightIdlPrin',
+            'idleholdprincess.png',
+            {frameWidth: 147, frameHeight: 155}
+        );
+        
 
         //
         //PRINCESS SPRITES
         //
 
         this.load.image('princess', 'princessground.png');
+        this.load.image('princessair', 'throwprincess.png');
 
         //
         //ENEMY SPRITE

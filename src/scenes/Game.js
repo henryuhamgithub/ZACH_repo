@@ -45,6 +45,16 @@ export class Game extends Phaser.Scene {
             label: 'platform'
         });
 
+        let platformFinL = this.add.image(-300,200, 'base6');
+        this.matter.add.gameObject(platformFinL, { isStatic: true, label: 'platform' });
+        platformFinL.setVisible(false);
+        let platformFinR = this.add.image(850,200, 'base6');
+        this.matter.add.gameObject(platformFinR, { isStatic: true, label: 'platform' });
+        platformFinR.setVisible(false);
+        let triggerEnd = this.add.image(700,100, 'base2small');
+        this.matter.add.gameObject(triggerEnd, { isStatic: true, label: 'end' });
+        triggerEnd.setVisible(false);
+
 
         let platform1 = this.add.image(-130, 4665, 'base1');
         this.matter.add.gameObject(platform1, { isStatic: true, label: 'platform' });
@@ -102,6 +112,8 @@ export class Game extends Phaser.Scene {
 
         let platform27 = this.add.image(750, 530, 'base7small');
         this.matter.add.gameObject(platform27, { isStatic: true, label: 'platform' });
+
+        
 
 
         //create buttons and button enabling stuff in pairs
@@ -182,7 +194,7 @@ export class Game extends Phaser.Scene {
         button3.setData('isPressed', false);
         button3.setData('pressedTexture', 'buttonSidePressed')
 
-        let buttonPlatform3 = this.add.image(50, 1450, 'base5small');
+        let buttonPlatform3 = this.add.image(50, 1470, 'base5small');
         this.matter.add.gameObject(buttonPlatform3, {
             isStatic: true, 
             isSensor: true, 
@@ -207,7 +219,7 @@ export class Game extends Phaser.Scene {
         button4b.setData('pressedTexture', 'buttonSidePressed')
         button4b.flipX = true;
 
-        let buttonPlatform4 = this.add.image(250, 1275, 'base6small');
+        let buttonPlatform4 = this.add.image(250, 1270, 'base6small');
         this.matter.add.gameObject(buttonPlatform4, {
             isStatic: true, 
             isSensor: true, 
@@ -324,6 +336,12 @@ export class Game extends Phaser.Scene {
                 if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBody3 === this.princess.body) {
                     this.pickupPrincess(this.player, this.princess);
                     this.player.idle();
+                }
+
+                //player collision with END
+                const otherBodyE = pair.bodyA === this.player.body ? pair.bodyB : pair.bodyA;
+                if ((pair.bodyA === this.player.body || pair.bodyB === this.player.body) && otherBodyE.label === 'end') {
+                    this.scene.start('GameOver');
                 }
 
                 //princess wall bounce

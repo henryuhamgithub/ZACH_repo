@@ -35,14 +35,27 @@ export class Player extends Phaser.Physics.Matter.Sprite
     {
         this.anims.create({
             key: 'idleLeft',
-            frames: this.anims.generateFrameNumbers('knightIdle', { start: 3, end: 0 }),
+            frames: this.anims.generateFrameNumbers('knightIdle', { start: 0, end: 5 }),
             frameRate: 12,
             repeat: -1,
         })
 
         this.anims.create({
             key: 'idleRight',
-            frames: this.anims.generateFrameNumbers('knightIdle', { start: 4, end: 7 }),
+            frames: this.anims.generateFrameNumbers('knightIdle', { start: 6, end: 13 }),
+            frameRate: 12,
+            repeat: -1,
+        })
+        this.anims.create({
+            key: 'idleLeftP',
+            frames: this.anims.generateFrameNumbers('knightIdlPrin', { start: 0, end: 7 }),
+            frameRate: 12,
+            repeat: -1,
+        })
+
+        this.anims.create({
+            key: 'idleRightP',
+            frames: this.anims.generateFrameNumbers('knightIdlPrin', { start: 8, end: 14 }),
             frameRate: 12,
             repeat: -1,
         })
@@ -56,7 +69,20 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
         this.anims.create({
             key: 'runRight',
-            frames: this.anims.generateFrameNumbers('knightRun', { start: 6, end: 12}),
+            frames: this.anims.generateFrameNumbers('knightRun', { start: 6, end: 10}),
+            frameRate: 12,
+            repeat: -1,
+        })
+        this.anims.create({
+            key: 'runLeftP',
+            frames: this.anims.generateFrameNumbers('knightRunP', { start: 5, end: 0}),
+            frameRate: 12,
+            repeat: -1,
+        })
+
+        this.anims.create({
+            key: 'runRightP',
+            frames: this.anims.generateFrameNumbers('knightRunP', { start: 6, end: 10}),
             frameRate: 12,
             repeat: -1,
         })
@@ -70,21 +96,34 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
         this.anims.create({
             key: 'throwRight',
-            frames: this.anims.generateFrameNumbers('knightThrow', { start: 15, end: 29 }),
+            frames: this.anims.generateFrameNumbers('knightThrow', { start: 15, end: 28 }),
             frameRate:12,
             repeat: 0,
         })
 
         this.anims.create({
             key: 'chargeLeft',
-            frames: this.anims.generateFrameNumbers('knightCharge', { start: 5, end: 0 }),
+            frames: this.anims.generateFrameNumbers('knightCharge', { start: 0, end: 5 }),
             frameRate:12,
             repeat: 0,
         })
 
         this.anims.create({
             key: 'chargeRight',
-            frames: this.anims.generateFrameNumbers('knightCharge', { start: 6, end: 12 }),
+            frames: this.anims.generateFrameNumbers('knightCharge', { start: 10, end: 6 }),
+            frameRate:12,
+            repeat: 0,
+        })
+        this.anims.create({
+            key: 'chargeLeftP',
+            frames: this.anims.generateFrameNumbers('knightChaPrin', { start: 0, end: 5 }),
+            frameRate:12,
+            repeat: 0,
+        })
+
+        this.anims.create({
+            key: 'chargeRightP',
+            frames: this.anims.generateFrameNumbers('knightChaPrin', { start: 10, end: 6 }),
             frameRate:12,
             repeat: 0,
         })
@@ -101,7 +140,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
         
         if (this.carrying){
             //carrying animation
-            this.anims.play('runLeft', true);
+            this.anims.play('runLeftP', true);
         } else {
             this.anims.play('runLeft', true);
         }
@@ -118,7 +157,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
 
         if (this.carrying) {
             //carrying animation
-            this.anims.play('runRight', true);
+            this.anims.play('runRightP', true);
         } else {
             this.anims.play('runRight', true);
         }
@@ -134,9 +173,9 @@ export class Player extends Phaser.Physics.Matter.Sprite
         if (this.carrying) {
             //carrying animation
             if (this.facing == 'left'){
-                this.anims.play('idleLeft', true);
+                this.anims.play('idleLeftP', true);
             } else {
-                this.anims.play('idleRight', true);
+                this.anims.play('idleRightP', true);
             }
         } else {
             if (this.facing == 'left'){
@@ -219,7 +258,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
             } else {
                 if (this.carrying){
                     //carrying animation
-                    this.anims.play('runLeft', true);
+                    this.anims.play('runLeftP', true);
                 } else {
                     this.anims.play('runLeft', true);
                 }
@@ -231,7 +270,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
             } else {
                 if (this.carrying){
                     //carrying animation
-                    this.anims.play('runRight', true);
+                    this.anims.play('runRightP', true);
                 } else {
                     this.anims.play('runRight', true);
                 }
@@ -263,9 +302,9 @@ export class Player extends Phaser.Physics.Matter.Sprite
             this.idle();
             if (this.carrying) {
                 if (this.facing === 'right'){
-                    //carrying texture
+                    this.anims.play('chargeRightP', true);
                 } else {
-                    //carrying texture
+                    this.anims.play('chargeLeftP', true);
                 }
             } else {
                 if (this.facing === 'right'){
@@ -283,12 +322,21 @@ export class Player extends Phaser.Physics.Matter.Sprite
         // Handle jump release
         if (space.isUp && this.jumpCharging == true){
             this.jump();
-            if (this.facing == 'left') {
-                this.anims.play('runLeft', true);
-            } else {
-                this.anims.play('runRight', true);
+            if (this.carrying){
+                    //carrying animation
+                    if (this.facing == 'left') {
+                        this.anims.play('runLeftP', true);
+                    } else {
+                        this.anims.play('runRightP', true);
+                    }
+                } 
+            else {
+                    if (this.facing == 'left') {
+                        this.anims.play('runLeft', true);
+                    } else {
+                        this.anims.play('runRight', true);
+                    }
             }
-
             this.jumpCharging = false;
             this.charge = 0;
         }
@@ -314,11 +362,20 @@ export class Player extends Phaser.Physics.Matter.Sprite
         if (cursors.up.isDown && this.onLadder){
             this.climb();
             if (this.carrying) {
-                //carrying animation
-                this.setTexture('knight');
+            //carrying animation
+            if (this.facing == 'left'){
+                this.anims.play('idleLeftP', true);
             } else {
-                this.setTexture('knight');
+                this.anims.play('idleRightP', true);
             }
+        } else {
+            if (this.facing == 'left'){
+                this.anims.play('idleLeft', true);
+            } else {
+                this.anims.play('idleRight', true);
+            }
+
+        }
             this.climbing = true;
 
             if (!cursors.left.isDown && !cursors.right.isDown) {
@@ -342,7 +399,7 @@ export class Player extends Phaser.Physics.Matter.Sprite
                 this.anims.play('throwRight', true);
             } 
         } else {
-            if (this.x > 650) {
+            if (this.x < 650) {
                 this.anims.play('throwLeft', true)
             } else{
                 this.anims.play('throwRight', true);
