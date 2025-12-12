@@ -39,6 +39,10 @@ export class Princess extends Phaser.Physics.Matter.Sprite
             this.bounceCooldown -= 1;
         }
 
+        if (!this.isGround){
+            this.setTexture('princessair');
+        }
+
         // Ground bounce
         if (this.isGrounded && this.body.velocity.y >= 0 && this.bounceCooldown === 0){
             if (Math.abs(this.body.velocity.x) > 0.5 || Math.abs(this.body.velocity.y) > 0) {
